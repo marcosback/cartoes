@@ -1,0 +1,589 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Engenharia Brito — Dados cadastrais</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Carlito:wght@400;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<style>
+  :root {
+    --bg: #f5f2ed;
+    --card: #ffffff;
+    --ink: #2b2826;
+    --ink-2: #6b6560;
+    --line: #e6e0d8;
+    --accent: #d88a1e;
+    --accent-ink: #ffffff;
+    --ok: #1f7a4d;
+    --hero: #fbf3e6;
+    --brand-bar: #2b2826;
+    --brand-bar-ink: #f5f2ed;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #1c1a18;
+      --card: #262321;
+      --ink: #f3efe9;
+      --ink-2: #a89f95;
+      --line: #3a3530;
+      --accent: #e39a36;
+      --accent-ink: #1c1a18;
+      --ok: #6cc394;
+      --hero: #302b26;
+      --brand-bar: #141210;
+      --brand-bar-ink: #f3efe9;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #1c1a18;
+    --card: #262321;
+    --ink: #f3efe9;
+    --ink-2: #a89f95;
+    --line: #3a3530;
+    --accent: #e39a36;
+    --accent-ink: #1c1a18;
+    --ok: #6cc394;
+    --hero: #302b26;
+    --brand-bar: #141210;
+    --brand-bar-ink: #f3efe9;
+  }
+
+  * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: "Carlito", "Calibri", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    font-size: 17px;
+    line-height: 1.4;
+    font-feature-settings: "tnum" 1;
+  }
+  a { color: inherit; }
+  button { font: inherit; cursor: pointer; }
+  button:focus-visible, a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+  .wrap {
+    max-width: 560px;
+    margin: 0 auto;
+    padding: 0 16px 120px;
+  }
+  .brand {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 14px 6px 18px;
+  }
+  .brand .logo {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 9px;
+    text-decoration: none;
+    color: var(--ink);
+  }
+  .brand .mark {
+    width: 30px; height: 30px;
+    border-radius: 7px;
+    background: var(--accent);
+    color: var(--accent-ink);
+    display: inline-flex; align-items: center; justify-content: center;
+    font-weight: 700; font-size: 19px;
+    align-self: center;
+  }
+  .brand .name { font-weight: 700; font-size: 20px; letter-spacing: -0.01em; }
+  .brand .name small { font-weight: 400; color: var(--ink-2); font-size: 15px; margin-left: 4px; }
+  .brand .tag { color: var(--ink-2); font-size: 14px; text-align: right; max-width: 190px; line-height: 1.25; }
+  .card { border-top: 4px solid var(--accent); }
+
+  .card {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    overflow: hidden;
+  }
+
+  /* Cabeçalho: quem é */
+  .head {
+    padding: 26px 22px 20px;
+    border-bottom: 1px solid var(--line);
+  }
+  .head h1 {
+    margin: 0 0 4px;
+    font-size: 30px;
+    line-height: 1.15;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+  }
+  .head .razao {
+    margin: 0;
+    color: var(--ink-2);
+    font-size: 15px;
+  }
+
+  /* CNPJ em destaque */
+  .hero {
+    background: var(--hero);
+    padding: 18px 22px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    border-bottom: 1px solid var(--line);
+  }
+  .hero .lbl { display: block; color: var(--ink-2); font-size: 14px; margin-bottom: 2px; }
+  .hero .val {
+    font-size: clamp(22px, 6vw, 30px);
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    white-space: nowrap;
+    user-select: all;
+  }
+
+  /* Linhas de dados */
+  .rows { margin: 0; padding: 0; list-style: none; }
+  .row {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 6px 12px;
+    align-items: center;
+    padding: 14px 22px;
+    border-bottom: 1px solid var(--line);
+  }
+  .row:last-child { border-bottom: 0; }
+  .row .lbl { color: var(--ink-2); font-size: 14px; }
+  .row .val {
+    font-size: 17px;
+    font-weight: 500;
+    overflow-wrap: anywhere;
+    user-select: all;
+  }
+  .row .val a { text-decoration: none; }
+  .row .val a:hover { text-decoration: underline; }
+  .row .txt { grid-column: 1; }
+  .row .copy { grid-column: 2; grid-row: 1 / span 2; }
+
+  /* Botão copiar de cada linha */
+  .copy {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 12px;
+    border: 1px solid var(--line);
+    background: transparent;
+    color: var(--ink);
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    min-width: 96px;
+    justify-content: center;
+    transition: background .15s, border-color .15s, color .15s;
+  }
+  .copy:hover { border-color: var(--accent); }
+  .copy.done { background: var(--ok); border-color: var(--ok); color: #fff; }
+  .copy { font-weight: 700; }
+  .copy svg { width: 15px; height: 15px; flex: none; }
+
+  /* Barra de ações fixa */
+  .actions {
+    position: fixed;
+    left: 0; right: 0; bottom: 0;
+    padding: 12px 16px calc(12px + env(safe-area-inset-bottom));
+    background: var(--card);
+    border-top: 1px solid var(--line);
+  }
+  .actions .inner {
+    max-width: 560px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 8px;
+  }
+  .act {
+    padding: 12px 8px;
+    border-radius: 10px;
+    border: 1px solid var(--accent);
+    background: transparent;
+    color: var(--accent);
+    font-weight: 600;
+    font-size: 14px;
+    line-height: 1.2;
+    text-align: center;
+  }
+  .act.primary { background: var(--accent); color: var(--accent-ink); }
+  .act.done { background: var(--ok); border-color: var(--ok); color: #fff; }
+  .act:disabled { opacity: .5; cursor: default; }
+
+  /* Painel do QR / contato */
+  .panel {
+    margin-top: 16px;
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    padding: 20px 22px;
+    display: none;
+  }
+  .panel.open { display: block; }
+  .panel h2 { margin: 0 0 6px; font-size: 18px; font-weight: 600; }
+  .panel p { margin: 0 0 14px; color: var(--ink-2); font-size: 15px; }
+  .qr {
+    display: flex;
+    justify-content: center;
+    padding: 14px;
+    background: #fff;
+    border-radius: 10px;
+    border: 1px solid var(--line);
+  }
+  .qr img, .qr canvas { display: block; max-width: 100%; height: auto; }
+
+  .foot {
+    margin-top: 18px;
+    color: var(--ink-2);
+    font-size: 13px;
+    text-align: center;
+  }
+  .foot strong { color: var(--ink); font-weight: 700; }
+  .foot a { text-decoration: none; }
+  .foot a:hover { text-decoration: underline; }
+
+  .toast {
+    position: fixed;
+    left: 50%; bottom: 96px;
+    transform: translateX(-50%) translateY(8px);
+    background: var(--ink);
+    color: var(--bg);
+    padding: 10px 16px;
+    border-radius: 10px;
+    font-size: 14px;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity .18s, transform .18s;
+    max-width: 90vw;
+  }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+  @media (prefers-reduced-motion: reduce) {
+    * { transition: none !important; }
+  }
+  @media (max-width: 380px) {
+    .row { grid-template-columns: 1fr; }
+    .row .copy { grid-column: 1; grid-row: auto; justify-self: start; }
+  }
+</style>
+</head>
+<body>
+
+<main class="wrap">
+  <header class="brand">
+    <a class="logo" href="https://www.instagram.com/backcontabilidade" target="_blank" rel="noopener" aria-label="Back Consultoria e Contabilidade">
+      <span class="mark">B</span>
+      <span class="name">Back <small>Consultoria e Contabilidade</small></span>
+    </a>
+    <span class="tag">Mais que números.<br>Inteligência para decidir.</span>
+  </header>
+
+  <section class="card" aria-label="Dados cadastrais">
+    <header class="head">
+      <h1 id="fantasia"></h1>
+      <p class="razao" id="razao"></p>
+    </header>
+
+    <div class="hero">
+      <div>
+        <span class="lbl">CNPJ</span>
+        <span class="val" id="cnpj"></span>
+      </div>
+      <button class="copy" data-key="cnpj" aria-label="Copiar CNPJ">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+        <span>Copiar</span>
+      </button>
+    </div>
+
+    <ul class="rows" id="rows"></ul>
+  </section>
+
+  <section class="panel" id="panel" aria-live="polite">
+    <h2>Salvar como contato</h2>
+    <p>Aponte a câmera do celular para o código. Ele adiciona a empresa à agenda com telefone, e‑mail, endereço e CNPJ.</p>
+    <div class="qr" id="qr"></div>
+  </section>
+
+  <p class="foot">Cartão cadastral emitido por <strong>Back Consultoria e Contabilidade</strong>, Blumenau/SC<br><a href="https://www.instagram.com/backcontabilidade" target="_blank" rel="noopener">@backcontabilidade</a> · atualizado em <span id="atualizado"></span></p>
+</main>
+
+<div class="actions">
+  <div class="inner">
+    <button class="act primary" id="btn-all">Copiar tudo</button>
+    <button class="act" id="btn-pdf">Baixar PDF</button>
+    <button class="act" id="btn-vcard">Salvar contato</button>
+  </div>
+</div>
+
+<div class="toast" id="toast" role="status"></div>
+
+<script>
+/* ============================================================
+   DADOS DO CLIENTE — único bloco que muda de empresa para empresa
+   ============================================================ */
+const DADOS = {
+  razao:      "Engenharia Brito LTDA",
+  fantasia:   "Engenharia Brito",
+  cnpj:       "62.579.929/0001-74",
+  ie:         "Isento",
+  im:         "189564",
+  regime:     "Simples Nacional",
+  porte:      "ME",
+  logradouro: "Rua Belmiro Colzani, 1644, Casa",
+  bairro:     "Progresso",
+  cidade:     "Blumenau",
+  uf:         "SC",
+  cep:        "89027-600",
+  email:      "engenhariabrito25@gmail.com",
+  telefone:   "(47) 99270-9372",
+  atualizado: "16/09/2026"
+};
+
+/* ---------- derivados ---------- */
+const enderecoCompleto = `${DADOS.logradouro} – ${DADOS.bairro} – ${DADOS.cidade}/${DADOS.uf} – CEP ${DADOS.cep}`;
+const telDigits = DADOS.telefone.replace(/\D/g, "");
+const telE164 = "+55" + telDigits;
+
+const CAMPOS = [
+  { key: "razao",    lbl: "Razão social",        val: DADOS.razao },
+  { key: "fantasia", lbl: "Nome fantasia",       val: DADOS.fantasia },
+  { key: "ie",       lbl: "Inscrição estadual",  val: DADOS.ie },
+  { key: "im",       lbl: "Inscrição municipal", val: DADOS.im },
+  { key: "regime",   lbl: "Regime tributário",   val: `${DADOS.regime} (${DADOS.porte})` },
+  { key: "endereco", lbl: "Endereço",            val: enderecoCompleto },
+  { key: "cep",      lbl: "CEP",                 val: DADOS.cep },
+  { key: "email",    lbl: "E‑mail",              val: DADOS.email, href: "mailto:" + DADOS.email },
+  { key: "telefone", lbl: "Telefone / WhatsApp", val: DADOS.telefone, href: "https://wa.me/" + "55" + telDigits }
+];
+const VALORES = Object.fromEntries(CAMPOS.map(c => [c.key, c.val]));
+VALORES.cnpj = DADOS.cnpj;
+
+/* ---------- texto padrão (WhatsApp / e‑mail) ---------- */
+const TEXTO_PADRAO =
+`${DADOS.razao}
+CNPJ: ${DADOS.cnpj}
+Nome fantasia: ${DADOS.fantasia}
+Inscrição estadual: ${DADOS.ie}
+Inscrição municipal: ${DADOS.im}
+Regime tributário: ${DADOS.regime} (${DADOS.porte})
+Endereço: ${enderecoCompleto}
+E-mail: ${DADOS.email}
+Telefone: ${DADOS.telefone}`;
+
+/* ---------- vCard (com o texto completo nas notas) ---------- */
+const vesc = t => String(t).replace(/\\/g, "\\\\").replace(/;/g, "\\;").replace(/,/g, "\\,").replace(/\r?\n/g, "\\n");
+const linkPagina = (location.protocol.startsWith("http") ? location.href.split("#")[0] : "");
+const VCARD =
+`BEGIN:VCARD
+VERSION:3.0
+N:${vesc(DADOS.fantasia)};;;;
+FN:${vesc(DADOS.fantasia)}
+ORG:${vesc(DADOS.razao)}
+TITLE:CNPJ ${DADOS.cnpj}
+TEL;TYPE=CELL,VOICE,WORK:${telE164}
+EMAIL;TYPE=INTERNET,WORK:${DADOS.email}
+ADR;TYPE=WORK:;;${vesc(DADOS.logradouro + " - " + DADOS.bairro)};${vesc(DADOS.cidade)};${DADOS.uf};${DADOS.cep};Brasil
+${linkPagina ? "URL:" + linkPagina + "\n" : ""}NOTE:${vesc(TEXTO_PADRAO)}
+END:VCARD`;
+
+/* ---------- render ---------- */
+document.getElementById("fantasia").textContent = DADOS.fantasia;
+document.getElementById("razao").textContent = DADOS.razao;
+document.getElementById("cnpj").textContent = DADOS.cnpj;
+document.getElementById("atualizado").textContent = DADOS.atualizado;
+
+const COPY_ICON = document.querySelector(".copy svg").outerHTML;
+const rows = document.getElementById("rows");
+for (const c of CAMPOS) {
+  const li = document.createElement("li");
+  li.className = "row";
+  const lbl = document.createElement("span");
+  lbl.className = "lbl txt"; lbl.textContent = c.lbl;
+  const val = document.createElement("span");
+  val.className = "val txt";
+  if (c.href) {
+    const a = document.createElement("a");
+    a.href = c.href; a.textContent = c.val;
+    if (c.href.startsWith("http")) { a.target = "_blank"; a.rel = "noopener"; }
+    val.appendChild(a);
+  } else {
+    val.textContent = c.val;
+  }
+  const btn = document.createElement("button");
+  btn.className = "copy"; btn.dataset.key = c.key;
+  btn.setAttribute("aria-label", "Copiar " + c.lbl.toLowerCase());
+  btn.innerHTML = COPY_ICON + "<span>Copiar</span>";
+  li.append(lbl, val, btn);
+  rows.appendChild(li);
+}
+
+/* ---------- copiar ---------- */
+async function copiar(texto) {
+  try {
+    await navigator.clipboard.writeText(texto);
+    return true;
+  } catch (e) {
+    try {
+      const ta = document.createElement("textarea");
+      ta.value = texto; ta.setAttribute("readonly", "");
+      ta.style.position = "fixed"; ta.style.top = "-1000px";
+      document.body.appendChild(ta); ta.select();
+      const ok = document.execCommand("copy");
+      ta.remove();
+      return ok;
+    } catch (e2) { return false; }
+  }
+}
+
+const toast = document.getElementById("toast");
+let toastTimer;
+function aviso(msg) {
+  toast.textContent = msg;
+  toast.classList.add("show");
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => toast.classList.remove("show"), 1800);
+}
+
+function marcar(btn, textoOk) {
+  const span = btn.querySelector("span") || btn;
+  const antes = span.textContent;
+  btn.classList.add("done"); span.textContent = textoOk;
+  setTimeout(() => { btn.classList.remove("done"); span.textContent = antes; }, 1600);
+}
+
+document.addEventListener("click", async (ev) => {
+  const btn = ev.target.closest(".copy");
+  if (!btn) return;
+  const ok = await copiar(VALORES[btn.dataset.key]);
+  if (ok) marcar(btn, "Copiado");
+  else aviso("Não foi possível copiar. Selecione o texto e copie manualmente.");
+});
+
+document.getElementById("btn-all").addEventListener("click", async (ev) => {
+  const ok = await copiar(TEXTO_PADRAO);
+  if (ok) { marcar(ev.currentTarget, "Copiado"); aviso("Dados completos copiados. Cole no WhatsApp ou e‑mail."); }
+  else aviso("Não foi possível copiar automaticamente.");
+});
+
+/* ---------- vCard via QR ---------- */
+let qrPronto = false;
+function gerarQR() {
+  if (qrPronto) return true;
+  if (typeof qrcode === "undefined") { aviso("Gerador de QR não carregou. Recarregue a página."); return false; }
+  try {
+    qrcode.stringToBytes = qrcode.stringToBytesFuncs["UTF-8"];
+    const qr = qrcode(0, "L");
+    qr.addData(VCARD, "Byte");
+    qr.make();
+    const n = qr.getModuleCount(), margem = 2, escala = 4;
+    const tam = (n + margem * 2) * escala;
+    const canvas = document.createElement("canvas");
+    canvas.width = tam; canvas.height = tam;
+    canvas.style.width = "260px"; canvas.style.height = "260px";
+    canvas.setAttribute("aria-label", "QR code do contato");
+    const ctx = canvas.getContext("2d");
+    ctx.fillStyle = "#ffffff"; ctx.fillRect(0, 0, tam, tam);
+    ctx.fillStyle = "#2b2826";
+    for (let r = 0; r < n; r++) for (let c = 0; c < n; c++)
+      if (qr.isDark(r, c)) ctx.fillRect((c + margem) * escala, (r + margem) * escala, escala, escala);
+    const box = document.getElementById("qr");
+    box.innerHTML = ""; box.appendChild(canvas);
+    qrPronto = true;
+    return true;
+  } catch (e) {
+    aviso("Não foi possível gerar o QR: " + (e && e.message ? e.message : e));
+    return false;
+  }
+}
+document.getElementById("btn-vcard").addEventListener("click", () => {
+  const panel = document.getElementById("panel");
+  panel.classList.toggle("open");
+  if (panel.classList.contains("open")) {
+    gerarQR();
+    panel.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+});
+
+/* ---------- PDF ---------- */
+let downloads = null;
+if (window.claude && typeof window.claude.use === "function") {
+  window.claude.use("downloads").then(d => { downloads = d; }).catch(() => {});
+}
+
+function gerarPDF() {
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF({ unit: "mm", format: "a4" });
+  const ink = [43, 40, 38], muted = [107, 101, 96], accent = [216, 138, 30];
+  const M = 20; let y = 30;
+
+  doc.setFillColor(...accent); doc.rect(0, 0, 210, 4, "F");
+  doc.setFillColor(...accent); doc.roundedRect(M, 11, 8, 8, 1.5, 1.5, "F");
+  doc.setFont("helvetica", "bold"); doc.setFontSize(9); doc.setTextColor(255, 255, 255); doc.text("B", M + 2.3, 16.8);
+  doc.setFontSize(12); doc.setTextColor(...ink); doc.text("Back", M + 11, 17);
+  doc.setFont("helvetica", "normal"); doc.setFontSize(9); doc.setTextColor(...muted);
+  doc.text("Consultoria e Contabilidade", M + 22, 17);
+  doc.text("Mais que números. Inteligência para decidir.", 190, 17, { align: "right" });
+
+  doc.setFont("helvetica", "bold"); doc.setFontSize(22); doc.setTextColor(...ink);
+  doc.text(DADOS.fantasia, M, y); y += 8;
+  doc.setFont("helvetica", "normal"); doc.setFontSize(11); doc.setTextColor(...muted);
+  doc.text(DADOS.razao, M, y); y += 10;
+
+  doc.setFillColor(251, 243, 230); doc.roundedRect(M, y, 170, 20, 2, 2, "F");
+  doc.setFontSize(9); doc.setTextColor(...muted); doc.text("CNPJ", M + 6, y + 7);
+  doc.setFont("helvetica", "bold"); doc.setFontSize(18); doc.setTextColor(...ink);
+  doc.text(DADOS.cnpj, M + 6, y + 15); y += 30;
+
+  doc.setFont("helvetica", "normal");
+  for (const c of CAMPOS) {
+    doc.setFontSize(9); doc.setTextColor(...muted); doc.text(c.lbl, M, y);
+    doc.setFontSize(11.5); doc.setTextColor(...ink);
+    const linhas = doc.splitTextToSize(c.val, 170);
+    doc.text(linhas, M, y + 5.5);
+    y += 5.5 + linhas.length * 5.5 + 3;
+    doc.setDrawColor(230, 224, 216); doc.line(M, y, M + 170, y); y += 6;
+  }
+
+  const canvas = document.querySelector("#qr canvas");
+  if (canvas) {
+    y += 2;
+    doc.setFontSize(9); doc.setTextColor(...muted);
+    doc.text("Aponte a câmera para salvar o contato", M + 42, y + 18);
+    doc.addImage(canvas.toDataURL("image/png"), "PNG", M, y, 36, 36);
+    y += 42;
+  }
+
+  doc.setFontSize(9); doc.setTextColor(...muted);
+  doc.text(`Cartão cadastral emitido por Back Consultoria e Contabilidade, Blumenau/SC · @backcontabilidade · atualizado em ${DADOS.atualizado}`, M, 285);
+  return doc;
+}
+
+document.getElementById("btn-pdf").addEventListener("click", async (ev) => {
+  const btn = ev.currentTarget;
+  if (typeof window.jspdf === "undefined") { aviso("Gerador de PDF não carregou. Recarregue a página."); return; }
+  gerarQR();
+  const nome = `Dados cadastrais - ${DADOS.fantasia}.pdf`;
+  const pdf = gerarPDF();
+  if (downloads) {
+    try {
+      await downloads.save({ filename: nome, data: pdf.output("blob") });
+      marcar(btn, "Salvo");
+    } catch (e) {
+      if (e && e.code === "declined") return;
+      aviso("Não foi possível salvar o PDF aqui.");
+    }
+  } else {
+    try { pdf.save(nome); marcar(btn, "Salvo"); }
+    catch (e) { aviso("Download indisponível nesta visualização."); }
+  }
+});
+</script>
+</body>
+</html>
